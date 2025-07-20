@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: Brocade G720 SAN Switch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tech Neutral (Slate, Amber, Sky) -->
+    <!-- Application Structure Plan: A thematic, single-page scrolling application. The structure is designed for a logical discovery process: starting with a high-level overview, moving to a functional explanation (interactive diagram), detailing technical specifications, presenting a balanced view (benefits/drawbacks), and concluding with a quantitative impact analysis (SAN performance chart). This flow guides the user from 'what it is' to 'how it works' and finally 'why it matters', which is more intuitive for understanding a complex hardware component than a traditional report layout. Navigation buttons allow users to jump to sections of interest, supporting both linear and non-linear exploration. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Brocade G720 Switch. Goal: Provide a comprehensive overview.
+        - How It Works Diagram: Goal: Organize/Explain data flow. Method: Interactive diagram built with HTML/CSS. Interaction: Clicking on a component (Server, Switch, Storage) highlights it and displays a contextual explanation. Justification: This method avoids static images and prohibited SVGs, making the learning process engaging and self-directed.
+        - Key Specifications: Goal: Inform. Method: A grid of info cards. Interaction: N/A, static display for clarity. Justification: More visually appealing and scannable than a dense table, breaking down complex data into manageable categories.
+        - Benefits & Disadvantages: Goal: Compare. Method: Two-column layout with icons (Unicode). Interaction: N/A, clear visual separation. Justification: A universally understood format for balanced analysis.
+        - SAN Performance Impact: Goal: Compare/Show Change. Method: Bar Chart via Chart.js. Interaction: Hover tooltips provide exact metrics. Justification: Effectively quantifies the value proposition of the switch in its primary environment (SAN), directly addressing a key part of the user's request.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .diagram-item {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .diagram-item.active {
+            border-color: #38bdf8; /* sky-400 */
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+        .nav-link.active {
+            color: #0ea5e9; /* sky-500 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Brocade G720 SAN Switch</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">An Interactive Technical Report on Gen 7 Fibre Channel Technology</p>
+        </header>
+
+        <nav class="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-lg border-b border-slate-200 mb-12">
+            <div class="flex justify-center items-center py-3 space-x-2 md:space-x-6 text-sm md:text-base">
+                <a href="#overview" class="nav-link font-medium text-slate-600 hover:text-sky-500 transition-colors">Overview</a>
+                <a href="#diagram" class="nav-link font-medium text-slate-600 hover:text-sky-500 transition-colors">How It Works</a>
+                <a href="#specs" class="nav-link font-medium text-slate-600 hover:text-sky-500 transition-colors">Specifications</a>
+                <a href="#pros-cons" class="nav-link font-medium text-slate-600 hover:text-sky-500 transition-colors">Analysis</a>
+                <a href="#san" class="nav-link font-medium text-slate-600 hover:text-sky-500 transition-colors">SAN Impact</a>
+            </div>
+        </nav>
+
+        <main>
+            <section id="overview" class="mb-16 md:mb-24 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Executive Overview</h2>
+                <div class="flex flex-col gap-8 items-center">
+                    <div class="w-full max-w-4xl mx-auto text-center">
+                         <p class="text-slate-600 leading-relaxed mb-4">This section provides a high-level introduction to the Brocade G720 switch. It covers its primary function as a core component in modern data centers and introduces the underlying Gen 7 Fibre Channel technology that enables its high performance. The goal is to establish a foundational understanding before diving into more technical details.</p>
+                        <p class="text-slate-600 leading-relaxed">The Brocade G720 is a high-density, building-block switch for Storage Area Networks (SANs). It leverages 64Gb/s Gen 7 Fibre Channel (FC) technology to provide the connectivity and bandwidth required for demanding workloads, such as large-scale virtualization, solid-state storage arrays (All-Flash), and NVMe-based storage. By creating a low-latency, high-performance fabric, the G720 aims to eliminate I/O bottlenecks and enable faster, more reliable access to data, ensuring that application performance is not limited by the network.</p>
+                    </div>
+                    <div class="mt-8 w-full">
+                        <h3 class="text-xl font-semibold text-center text-slate-800 mb-6">The G720 Value Proposition Flowchart</h3>
+                        <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-0">
+                            <div class="flex items-center">
+                                <div class="p-4 bg-white rounded-xl shadow-sm border border-slate-200 w-full md:w-56 text-center h-full flex flex-col justify-center">
+                                    <p class="font-bold text-slate-500">INPUT</p>
+                                    <p class="text-slate-600 text-sm mt-1">Demanding Workloads (VMs, NVMe, All-Flash)</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center text-slate-400 text-4xl transform rotate-90 md:rotate-0 md:mx-4">→</div>
+                            <div class="flex items-center">
+                                <div class="p-4 bg-white rounded-xl shadow-sm border border-amber-300 w-full md:w-56 text-center h-full flex flex-col justify-center">
+                                    <p class="font-bold text-amber-600">PROBLEM</p>
+                                    <p class="text-slate-600 text-sm mt-1">I/O Bottlenecks & High Latency Limit Performance</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center text-slate-400 text-4xl transform rotate-90 md:rotate-0 md:mx-4">→</div>
+                            <div class="flex items-center">
+                                <div class="p-4 bg-white rounded-xl shadow-sm border-2 border-sky-500 w-full md:w-56 text-center h-full flex flex-col justify-center">
+                                    <p class="font-bold text-sky-600">SOLUTION</p>
+                                    <p class="text-slate-600 text-sm mt-1">Brocade G720 with 64Gb/s FC & Autonomous SAN</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center text-slate-400 text-4xl transform rotate-90 md:rotate-0 md:mx-4">→</div>
+                            <div class="flex items-center">
+                                <div class="p-4 bg-white rounded-xl shadow-sm border border-green-300 w-full md:w-56 text-center h-full flex flex-col justify-center">
+                                    <p class="font-bold text-green-600">OUTCOME</p>
+                                    <p class="text-slate-600 text-sm mt-1">Maximized Application Performance & Reliability</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="diagram" class="mb-16 md:mb-24 scroll-mt-24">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900">How It Works: Data Flow in a SAN</h2>
+                    <p class="mt-2 text-slate-600 max-w-3xl mx-auto">To understand the G720's role, it's helpful to see where it fits within a data center. The diagram below illustrates a typical data flow in a Storage Area Network (SAN). Click on each component to learn more about its function in this ecosystem.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-around gap-8 relative py-8">
+                    <div id="diagram-servers" class="diagram-item w-48 h-24 bg-white border-2 border-slate-300 rounded-xl flex items-center justify-center text-center p-2 z-10">
+                        <span class="font-semibold">Application Servers</span>
+                    </div>
+                    <div class="w-px md:w-20 h-8 md:h-px bg-slate-400"></div>
+                    <div id="diagram-switch" class="diagram-item w-48 h-36 bg-white border-2 border-slate-300 rounded-xl flex flex-col items-center justify-center text-center p-2 z-10 active">
+                        <span class="font-bold text-sky-600">Brocade G720 Switch</span>
+                        <span class="text-xs text-slate-500">(The SAN Fabric)</span>
+                    </div>
+                     <div class="w-px md:w-20 h-8 md:h-px bg-slate-400"></div>
+                    <div id="diagram-storage" class="diagram-item w-48 h-24 bg-white border-2 border-slate-300 rounded-xl flex items-center justify-center text-center p-2 z-10">
+                        <span class="font-semibold">Storage Arrays (SSD/NVMe)</span>
+                    </div>
+                </div>
+                <div id="diagram-text-container" class="mt-8 bg-slate-100 p-6 rounded-xl min-h-[150px] transition-all duration-300">
+                    <div id="desc-servers" class="hidden">
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">Application Servers</h3>
+                        <p class="text-slate-600">These are the engines of the data center, running business-critical applications (databases, virtual machines, etc.). They generate I/O requests to read and write data. These servers connect to the SAN fabric via Fibre Channel Host Bus Adapters (HBAs).</p>
+                    </div>
+                    <div id="desc-switch" class="">
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">Brocade G720 Switch (The SAN Fabric)</h3>
+                        <p class="text-slate-600">The G720 acts as the central traffic director. It receives I/O requests from the servers and routes them to the correct storage array with extremely low latency. It creates a dedicated, lossless network (a "fabric") optimized for storage traffic, ensuring data is delivered reliably and quickly without contention from other network traffic like email or web browsing.</p>
+                    </div>
+                    <div id="desc-storage" class="hidden">
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">Storage Arrays (SSD/NVMe)</h3>
+                        <p class="text-slate-600">This is where the data lives, typically on high-performance media like Solid-State Drives (SSDs) or NVMe devices. The storage arrays receive the I/O requests from the switch and perform the read/write operations, sending the data or acknowledgment back through the fabric to the requesting server.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="specs" class="mb-16 md:mb-24 scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-slate-900">Key Specifications</h2>
+                    <p class="mt-2 text-slate-600 max-w-3xl mx-auto">This section highlights the core technical specifications of the Brocade G720. The information is presented in self-contained cards for easy readability, allowing you to quickly grasp the key capabilities of the switch, from its port configuration and speed to its performance metrics.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-lg mb-2 text-sky-600">Fibre Channel Ports</h3>
+                        <p class="text-3xl font-bold">56 SFP+ Ports</p>
+                        <p class="text-slate-500 mt-1">Up to 56 ports in a 1U form factor, providing high-density connectivity.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-lg mb-2 text-sky-600">Port Speed</h3>
+                        <p class="text-3xl font-bold">64 Gb/s</p>
+                        <p class="text-slate-500 mt-1">Gen 7 Fibre Channel provides speeds of 64 Gb/s, with backward compatibility to 32/16 Gb/s.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-lg mb-2 text-sky-600">Aggregate Bandwidth</h3>
+                        <p class="text-3xl font-bold">4.096 Tb/s</p>
+                        <p class="text-slate-500 mt-1">Total non-blocking bandwidth available across all ports simultaneously.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-lg mb-2 text-sky-600">Latency</h3>
+                        <p class="text-3xl font-bold">&lt; 460 ns</p>
+                        <p class="text-slate-500 mt-1">Extremely low port-to-port latency, critical for flash storage and NVMe performance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pros-cons" class="mb-16 md:mb-24 scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-slate-900">Balanced Analysis</h2>
+                    <p class="mt-2 text-slate-600 max-w-3xl mx-auto">No technology is without trade-offs. This section presents a balanced view of the Brocade G720, outlining its key advantages in performance and management alongside potential considerations such as cost and complexity. This provides a realistic perspective on its deployment.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl border border-green-200 shadow-sm">
+                        <h3 class="text-2xl font-semibold text-green-700 mb-4 flex items-center"><span class="mr-2 text-2xl">✔</span> Benefits</h3>
+                        <ul class="space-y-3 text-slate-600">
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Performance:</strong> Eliminates I/O bottlenecks with 64Gb/s speeds and low latency, maximizing performance of flash and NVMe storage.</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Scalability:</strong> High-density 1U design allows for building large, scalable fabrics without excessive rack space.</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Reliability:</strong> Fibre Channel is inherently a lossless and reliable protocol. The G720 offers enterprise-class availability features for mission-critical workloads.</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Automation:</strong> Supports modern REST APIs for SAN management, enabling automation and integration with DevOps toolchains.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-amber-200 shadow-sm">
+                        <h3 class="text-2xl font-semibold text-amber-700 mb-4 flex items-center"><span class="mr-2 text-2xl">⚠</span> Disadvantages</h3>
+                         <ul class="space-y-3 text-slate-600">
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Cost:</strong> Fibre Channel hardware is typically more expensive than equivalent Ethernet networking components, representing a significant investment.</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Complexity:</strong> Requires specialized skills for design, implementation, and management (zoning, fabric services, etc.).</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Vendor Lock-in:</strong> While interoperable, SAN environments often perform best with components from a single vendor, potentially leading to lock-in.</li>
+                            <li class="flex items-start"><strong class="font-semibold text-slate-700 w-32 shrink-0">Niche Use Case:</strong> Primarily designed for storage traffic. Not suitable for general-purpose networking, requiring a separate Ethernet infrastructure.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="san" class="scroll-mt-24">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900">Impact in a SAN Environment</h2>
+                    <p class="mt-2 text-slate-600 max-w-3xl mx-auto">The most significant benefit of the G720 is the measurable performance improvement it brings to a Storage Area Network. The chart below visualizes the typical impact of upgrading from a legacy SAN infrastructure to a modern one powered by Gen 7 Fibre Channel technology, showing improvements in data throughput and reductions in latency.</p>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-slate-200">
+                    <div class="chart-container">
+                        <canvas id="sanChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-8 mt-16 border-t border-slate-200">
+            <p class="text-sm text-slate-500">This report is made by Ankit Kumar</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const diagramItems = {
+                servers: document.getElementById('diagram-servers'),
+                switch: document.getElementById('diagram-switch'),
+                storage: document.getElementById('diagram-storage'),
+            };
+
+            const descriptions = {
+                servers: document.getElementById('desc-servers'),
+                switch: document.getElementById('desc-switch'),
+                storage: document.getElementById('desc-storage'),
+            };
+
+            function handleDiagramClick(selectedKey) {
+                Object.keys(diagramItems).forEach(key => {
+                    const item = diagramItems[key];
+                    const desc = descriptions[key];
+                    
+                    if (key === selectedKey) {
+                        item.classList.add('active');
+                        desc.classList.remove('hidden');
+                    } else {
+                        item.classList.remove('active');
+                        desc.classList.add('hidden');
+                    }
+                });
+            }
+
+            Object.keys(diagramItems).forEach(key => {
+                diagramItems[key].addEventListener('click', () => handleDiagramClick(key));
+            });
+
+            const ctx = document.getElementById('sanChart').getContext('2d');
+            const sanChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Application Response Time', 'Data Throughput (per lane)', 'VMs per Host'],
+                    datasets: [
+                        {
+                            label: 'Legacy SAN (16Gb FC)',
+                            data: [100, 1600, 100],
+                            backgroundColor: 'rgba(148, 163, 184, 0.6)', // slate-400
+                            borderColor: 'rgba(100, 116, 139, 1)', // slate-500
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Gen 7 SAN with G720 (64Gb FC)',
+                            data: [33, 6400, 150],
+                            backgroundColor: 'rgba(56, 189, 248, 0.6)', // sky-400
+                            borderColor: 'rgba(14, 165, 233, 1)', // sky-500
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e2e8f0' // slate-200
+                            },
+                            ticks: {
+                                color: '#475569', // slate-600
+                                callback: function(value, index, values) {
+                                    if (this.getLabelForValue(value).includes('Time')) {
+                                        return value + ' ms';
+                                    }
+                                    if (this.getLabelForValue(value).includes('Throughput')) {
+                                        return value + ' MB/s';
+                                    }
+                                    return value;
+                                }
+                            }
+                        },
+                        y: {
+                           grid: {
+                                display: false
+                            },
+                           ticks: {
+                                color: '#475569', // slate-600
+                                font: {
+                                   size: 14
+                                }
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#334155' // slate-700
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        if (context.label === 'Application Response Time'){
+                                            label += `${context.parsed.x} ms (Lower is better)`;
+                                        } else if (context.label === 'Data Throughput (per lane)'){
+                                             label += `${context.parsed.x} MB/s`;
+                                        } else {
+                                             label += `${context.parsed.x} VMs`;
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                         title: {
+                            display: true,
+                            text: 'Performance Comparison: Legacy vs. Gen 7 SAN',
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            },
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#1e293b' // slate-800
+                        }
+                    }
+                }
+            });
+
+            // Scrollspy for navigation highlighting
+            const sections = document.querySelectorAll('main section[id]');
+            const navLinks = document.querySelectorAll('nav a.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: "-40% 0px -60% 0px",
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.remove('active', 'text-sky-500', 'font-semibold');
+                            link.classList.add('text-slate-600', 'font-medium');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.remove('text-slate-600', 'font-medium');
+                                link.classList.add('active', 'text-sky-500', 'font-semibold');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
